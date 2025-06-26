@@ -1,1 +1,0 @@
-Fitness tracker is an application with the goal of incentivising healthy habits through gamification and logging. The frontend uses React, the backend utilizes Flask, and the database used is MySQL.
