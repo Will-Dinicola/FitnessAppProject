@@ -1,4 +1,4 @@
-# Getting Started with Create React App
+This project was created using React, Flask, and MySQL to create a fitness tracker and incentivizer to help users achieve their goals.
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
