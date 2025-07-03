@@ -22,5 +22,15 @@ def hello_world():
 def get_data():
     return jsonify({"message": "Data send via connection"})
 
+@app.route("/testdb")
+def test_db():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SHOW TABLES;")
+    tables = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return {"tables": [t[0] for t in tables]}
+
 if __name__ == "__main__":
     app.run(debug=False)
