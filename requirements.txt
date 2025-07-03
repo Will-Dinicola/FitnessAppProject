@@ -1,1 +1,3 @@
-Setup of Flask, React, MySQL.
+Flask
+Flask-CORS
+mysql-connector-python
