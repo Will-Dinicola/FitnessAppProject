@@ -16,19 +16,68 @@ function TestFunction() {
     return <div>{data ? data : "Not loaded"}</div>;
 }
 
-function App() {
-    //jsx
+function ExerciseSelector({ onSelect }) {
+    const exercises = [
+      "Push-Up",
+      "Squat",
+      "Bench Press",
+      "Deadlift",
+      "Overhead Press",
+      "Pull-Up",
+      "Lunge",
+      "Plank",
+      "Bicep Curl",
+      "Tricep Dip",
+    ];
+    const [chosen, setChosen] = useState(exercises[0]);
+  
     return (
-        <div>
-            {/* render the text */}
-            <h1>Fitness App</h1>
-            {/* render the testFunction component */}
-            <TestFunction />
-        </div>
-        // Ends what to return
+      <div className="selector-container">
+        <label htmlFor="exercise" className="selector-label">
+          Choose an exercise:
+        </label>
+        <select
+          id="exercise"
+          value={chosen}
+          onChange={(e) => setChosen(e.target.value)}
+          className="exercise-select"
+        >
+          {exercises.map((ex) => (
+            <option key={ex} value={ex}>
+              {ex}
+            </option>
+          ))}
+        </select>
+        <button
+          className="select-button"
+          onClick={() => onSelect(chosen)}
+        >
+          Select Exercise
+        </button>
+      </div>
     );
-    // Ends the app component
-}
-
-// allows for index.js file to find this component
+  }
+  
+  function App() {
+    const [selectedExercise, setSelectedExercise] = useState("");
+  
+    const handleExercise = (exercise) => {
+      setSelectedExercise(exercise);
+      console.log("Exercise chosen:", exercise);
+      // TODO: integrate with workout state or API call here
+    };
+  
+    return (
+      <div className="App">
+        <h1>Fitness App</h1>
+        <TestFunction />
+        <ExerciseSelector onSelect={handleExercise} />
+        {selectedExercise && (
+          <p className="selected-display">
+            Selected exercise: <strong>{selectedExercise}</strong>
+          </p>
+        )}
+      </div>
+    );
+  }
 export default App;
