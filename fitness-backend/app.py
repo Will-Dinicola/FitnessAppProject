@@ -42,10 +42,19 @@ def test_db():
 def add_exercise():
     # get data sent to frontend
     data = request.get_json()
+    print("📥 Received from frontend:", data) # to see what's sent to the frontend
+
     workout_id = data.get("workout_id")  # track this in frontend
     name = data.get("name")
 
     # add stuff to record sets, reps, weight
+    sets = data.get("sets")
+    reps = data.get("reps")
+    weight = data.get("weight")
+    notes = data.get("notes")
+
+    if not workout_id or not name:
+        return jsonify({"message": "Workout or name must be provided"}), 400
 
     # connect to DB
     connect = get_db_connection()
@@ -53,8 +62,8 @@ def add_exercise():
 
     # insert into DB
     cursor.execute(
-        "INSERT INTO Exercises (workout_id, name) VALUES (%s, %s);",
-        (workout_id, name)
+        "INSERT INTO Exercises (workout_id, name, sets, reps, weight, notes) VALUES (%s, %s, %s, %s, %s, %s);",
+        (workout_id, name, sets, reps, weight, notes)
     )
 
     connect.commit()
