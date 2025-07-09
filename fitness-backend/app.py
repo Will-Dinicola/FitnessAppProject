@@ -49,7 +49,6 @@ def add_exercise():
     workout_id = data.get("workout_id")  # track this in frontend
     name = data.get("name")
 
-    # add stuff to record sets, reps, weight
     sets = data.get("sets")
     reps = data.get("reps")
     weight = data.get("weight")

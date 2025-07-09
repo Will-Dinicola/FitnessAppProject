@@ -1,3 +1,6 @@
+/* jshint esversion: 6 */
+"use strict";
+
 import React, { useState } from "react";
 import { useEffect } from "react";
 import "./App.css";
