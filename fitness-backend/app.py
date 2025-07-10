@@ -2,8 +2,6 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 from flask import request
 import mysql.connector
-from datetime import datetime
-
 
 app = Flask(__name__)
 CORS(app)
@@ -39,6 +37,16 @@ def test_db():
     connect.close()
     return {"tables": [t[0] for t in tables]}
 
+@app.route("/api/workouts", methods=["GET"])
+def get_workouts():
+    connect = get_db_connection()
+    cursor = connect.cursor(dictionary=True)
+    cursor.execute("SELECT id FROM Workouts;")
+    rows = cursor.fetchall()
+    cursor.close()
+    connect.close()
+    return jsonify(rows), 200
+
 
 @app.route("/api/exercises", methods=["POST"])
 def add_exercise():
@@ -49,6 +57,7 @@ def add_exercise():
     workout_id = data.get("workout_id")  # track this in frontend
     name = data.get("name")
 
+    # add stuff to record sets, reps, weight
     sets = data.get("sets")
     reps = data.get("reps")
     weight = data.get("weight")
@@ -77,29 +86,6 @@ def add_exercise():
     return jsonify({"message": "Exercise logged successfully!"})
 
 
-# creates a new workout
-@app.route("/api/workouts", methods=["POST"])
-def create_workout():
-    data = request.get_json()
-    user_id = data.get("user_id", 1)  # default user_id = 1 if not given
-    date = data.get("date", datetime.today().strftime('%Y-%m-%d'))
-
-    connect = get_db_connection()
-    cursor = connect.cursor()
-
-    cursor.execute(
-        "INSERT INTO Workouts (user_id, date) VALUES (%s, %s);",
-        (user_id, date)
-    )
-    connect.commit()
-
-    workout_id = cursor.lastrowid
-
-    cursor.close()
-    connect.close()
-
-    return jsonify({"workout_id": workout_id})
-
-
 if __name__ == "__main__":
-    app.run(debug=False)
+    app.run(host="127.0.0.1", port=5000, debug=True)
+

@@ -1,8 +1,4 @@
-/* jshint esversion: 6 */
-"use strict";
-
-import React, { useState } from "react";
-import { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import "./App.css";
 
 import blankImg         from "./assets/images/blank.jpg";
@@ -66,26 +62,6 @@ function App() {
   const [notes, setNotes] = useState("");
   const [workoutId, setWorkoutId] = useState(null);
 
-    useEffect(() => {
-        const createWorkout = async () => {
-        try {
-        const response = await fetch("http://127.0.0.1:5000/api/workouts", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ user_id: 1 }) // make dynamic later to where user_id counts up
-        });
-        const result = await response.json();
-        setWorkoutId(result.workout_id);
-        console.log("🆕 Created workout ID:", result.workout_id);
-        } catch (err) {
-            console.error("Failed to create workout:", err);
-        }
-    };
-
-  createWorkout();
-}, []);
-
-
   const exerciseImages = {
     "Push-Up": pushUpImg,
     Squat: squatImg,
@@ -111,6 +87,54 @@ function App() {
     selectedExercise && exerciseImages[selectedExercise]
       ? exerciseImages[selectedExercise]
       : blankImg;
+
+  useEffect(() => {
+      fetch("/api/workouts")
+      .then(res => res.json())
+          .then((data) => {
+              if (data.length) {
+                  setWorkoutId(data[data.length - 1].id);
+              }
+          })
+
+          .catch(console.error);
+      }, []);
+
+  const handleSave = async () => {
+      try {
+          const payload = {
+              workout_id: workoutId,
+              name: selectedExercise,
+              sets: 1,
+              reps: parseInt(reps, 10),
+              weight: null,
+              notes,
+          };
+
+          const res = await fetch("/api/exercises", {
+              method: "POST",
+              headers: {"Content-Type": "application/json"},
+              body : JSON.stringify(payload),
+          });
+
+          if (!res.ok) {
+              const text = await res.text();
+              throw new Error(text || res.statusText);
+          }
+
+          const {message} = await res.json();
+          alert(message);
+
+          setSelectedExercise("");
+          setReps("");
+          setNotes("");
+      }
+
+      catch (err) {
+          console.error(err);
+          alert("ERROR: " + err.message);
+      }
+  };
 
   return (
     <div className="App">
@@ -154,35 +178,14 @@ function App() {
             />
           </div>
 
-            <button
-                className="save-button"
-                onClick={async () => {
-                    try {
-                        const response = await fetch("http://127.0.0.1:5000/api/exercises", {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json",
-                            },
-                            body: JSON.stringify({
-                                workout_id: workoutId,
-                                name: selectedExercise,
-                                sets: 1,         // default until I put code that allows users to change sets
-                                reps: parseInt(reps),
-                                weight: 0,       // default until I put code that allows users to change sets
-                                notes: notes,
-                            }),
-                        });
 
-                        const result = await response.json();
-                        console.log("Successfully saved:", result);
-                    } catch (error) {
-                        console.error("Failed to send to backend:", error);
-                    }
-                }}
+          <button
+            className="save-button"
+            onClick={handleSave}
+            disabled={!selectedExercise || !reps || workoutId === null}
             >
-                Save Entry
-            </button>
-
+              Save Entry
+          </button>
         </>
       )}
     </div>
@@ -190,4 +193,3 @@ function App() {
 }
 
 export default App;
-
