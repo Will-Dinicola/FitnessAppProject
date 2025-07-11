@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
 
-import blankImg         from "./assets/images/blank.jpg";
-import pushUpImg        from "./assets/images/push-up.jpg";
-import squatImg         from "./assets/images/squat.jpg";
-import benchPressImg    from "./assets/images/bench-press.jpg";
-import deadliftImg      from "./assets/images/deadlift.jpg";
-import overheadPressImg from "./assets/images/overhead-press.jpg";
-import pullUpImg        from "./assets/images/pull-up.jpg";
-import lungeImg         from "./assets/images/lunge.jpg";
-import plankImg         from "./assets/images/plank.jpg";
-import bicepCurlImg     from "./assets/images/bicep-curl.jpg";
-import tricepDipImg     from "./assets/images/tricep-dip.jpg";
+import LoginScreen from "./LoginScreen";
+
+import blankImg          from "./assets/images/blank.jpg";
+import pushUpImg         from "./assets/images/push-up.jpg";
+import squatImg          from "./assets/images/squat.jpg";
+import benchPressImg     from "./assets/images/bench-press.jpg";
+import deadliftImg       from "./assets/images/deadlift.jpg";
+import overheadPressImg  from "./assets/images/overhead-press.jpg";
+import pullUpImg         from "./assets/images/pull-up.jpg";
+import lungeImg          from "./assets/images/lunge.jpg";
+import plankImg          from "./assets/images/plank.jpg";
+import bicepCurlImg      from "./assets/images/bicep-curl.jpg";
+import tricepDipImg      from "./assets/images/tricep-dip.jpg";
 
 function ExerciseSelector({ onSelect }) {
   const exercises = [
@@ -57,6 +59,8 @@ function ExerciseSelector({ onSelect }) {
 }
 
 function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
   const [selectedExercise, setSelectedExercise] = useState("");
   const [reps, setReps] = useState("");
   const [notes, setNotes] = useState("");
@@ -77,64 +81,75 @@ function App() {
 
   const handleExercise = (exercise) => {
     setSelectedExercise(exercise);
-    // reset reps/notes when you change exercise
     setReps("");
     setNotes("");
   };
 
-  // pick blank or the selected image
   const currentImage =
     selectedExercise && exerciseImages[selectedExercise]
       ? exerciseImages[selectedExercise]
       : blankImg;
 
   useEffect(() => {
-      fetch("/api/workouts")
-      .then(res => res.json())
-          .then((data) => {
-              if (data.length) {
-                  setWorkoutId(data[data.length - 1].id);
-              }
-          })
-
-          .catch(console.error);
-      }, []);
+    fetch("/api/workouts")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.length) {
+          setWorkoutId(data[data.length - 1].id);
+        }
+      })
+      .catch(console.error);
+  }, []);
 
   const handleSave = async () => {
-      try {
-          const payload = {
-              workout_id: workoutId,
-              name: selectedExercise,
-              sets: 1,
-              reps: parseInt(reps, 10),
-              weight: null,
-              notes,
-          };
+    try {
+      const payload = {
+        workout_id: workoutId,
+        name: selectedExercise,
+        sets: 1,
+        reps: parseInt(reps, 10),
+        weight: null,
+        notes,
+      };
 
-          const res = await fetch("/api/exercises", {
-              method: "POST",
-              headers: {"Content-Type": "application/json"},
-              body : JSON.stringify(payload),
-          });
+      const res = await fetch("/api/exercises", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-          if (!res.ok) {
-              const text = await res.text();
-              throw new Error(text || res.statusText);
-          }
-
-          const {message} = await res.json();
-          alert(message);
-
-          setSelectedExercise("");
-          setReps("");
-          setNotes("");
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || res.statusText);
       }
 
-      catch (err) {
-          console.error(err);
-          alert("ERROR: " + err.message);
-      }
+      const { message } = await res.json();
+      alert(message);
+
+      // Reset UI
+      setSelectedExercise("");
+      setReps("");
+      setNotes("");
+    } catch (err) {
+      console.error(err);
+      alert("ERROR: " + err.message);
+    }
   };
+
+  if (!isLoggedIn) {
+    return (
+      <div className="App">
+        <h1>Fitness App</h1>
+        <LoginScreen
+          onLogin={(email, password) => {
+            //This isn't a real login yet its just a dummy one
+            console.log("Logging in:", email, password);
+            setIsLoggedIn(true);
+          }}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="App">
@@ -174,17 +189,16 @@ function App() {
               rows="3"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder=""
+              placeholder="How did it feel?"
             />
           </div>
-
 
           <button
             className="save-button"
             onClick={handleSave}
             disabled={!selectedExercise || !reps || workoutId === null}
-            >
-              Save Entry
+          >
+            Save Entry
           </button>
         </>
       )}
