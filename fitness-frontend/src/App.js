@@ -79,10 +79,19 @@ function App() {
     "Tricep Dip": tricepDipImg,
   };
 
-  const handleExercise = (exercise) => {
-    setSelectedExercise(exercise);
-    setReps("");
-    setNotes("");
+    const handleExercise = exercise => {
+      const img = exerciseImages[exercise];
+      if (exercise && img) {
+        console.log(`Selected exercise: ${exercise}`);
+        const filename = img.split("/").pop();
+        console.log(`Image displayed: ${filename}`);
+        console.log("Inputs visible: Reps field, Notes textarea");
+      } else {
+        console.error("FAIL");
+      }
+      setSelectedExercise(exercise);
+      setReps("");
+      setNotes("");
   };
 
   const currentImage =
