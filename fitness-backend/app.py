@@ -37,6 +37,16 @@ def test_db():
     connect.close()
     return {"tables": [t[0] for t in tables]}
 
+@app.route("/api/workouts", methods=["GET"])
+def get_workouts():
+    connect = get_db_connection()
+    cursor = connect.cursor(dictionary=True)
+    cursor.execute("SELECT id FROM Workouts;")
+    rows = cursor.fetchall()
+    cursor.close()
+    connect.close()
+    return jsonify(rows), 200
+
 
 @app.route("/api/exercises", methods=["POST"])
 def add_exercise():
@@ -77,4 +87,5 @@ def add_exercise():
 
 
 if __name__ == "__main__":
-    app.run(debug=False)
+    app.run(host="127.0.0.1", port=5000, debug=True)
+

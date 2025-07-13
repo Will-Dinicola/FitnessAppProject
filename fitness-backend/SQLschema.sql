@@ -27,7 +27,8 @@ CREATE TABLE IF NOT EXISTS Exercises (
     name VARCHAR(100) NOT NULL,
     sets INT DEFAULT 0,
     reps INT DEFAULT 0,
-    weight FLOAT DEFAULT 0,notes TEXT,
+    weight FLOAT DEFAULT 0,
+    notes TEXT,
     FOREIGN KEY (workout_id) REFERENCES Workouts(id)
 );
 
