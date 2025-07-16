@@ -1,4 +1,4 @@
-This project was created using React, Flask, and MySQL to create a fitness tracker and incentivizer to help users achieve their goals.
+This project was created using **React** for the frontend, **Flask** for the backend, and **MySQL (via Railway)** for the database, to create a fitness tracker and incentivizer to help users achieve their goals.
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
@@ -68,3 +68,24 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+## Running the DB
+
+### Create a **_.env_** file in the fitness-backend folder (same location as app.py) with the following code inserted into it:
+
+DB_HOST=your-db-host
+DB_PORT=your-db-port
+DB_USER=your-db-user
+DB_PASSWORD=your-db-password
+DB_NAME=FitnessAppDB
+
+_Please contact Nhi for the information on the DB_
+
+### Install dependencies:
+
+pip install -r requirements.txt
+
+### Start the Flask Sever
+
+### Start the React Server
+

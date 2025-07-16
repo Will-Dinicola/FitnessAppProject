@@ -1,19 +1,23 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
+from dotenv import load_dotenv
 from flask import request
 import mysql.connector
+import os
 
 app = Flask(__name__)
 CORS(app)
 
+load_dotenv()
+
 
 def get_db_connection():
     connect = mysql.connector.connect(
-        host="caboose.proxy.rlwy.net",
-        port=53416,
-        user="root",
-        password="hmYWITDjgmkOYDFBOjApTdkMdkOIhGRD",
-        database="FitnessAppDB"
+        host=os.getenv("DB_HOST"),
+        port=int(os.getenv("DB_PORT")),
+        user=os.getenv("DB_USER"),
+        password=os.getenv("DB_PASSWORD"),
+        database=os.getenv("DB_NAME")
     )
     return connect
 
