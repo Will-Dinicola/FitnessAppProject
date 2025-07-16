@@ -9,9 +9,10 @@ CORS(app)
 
 def get_db_connection():
     connect = mysql.connector.connect(
-        host="localhost",
-        user="user_name",
-        password="user_password",
+        host="caboose.proxy.rlwy.net",
+        port=53416,
+        user="root",
+        password="hmYWITDjgmkOYDFBOjApTdkMdkOIhGRD",
         database="FitnessAppDB"
     )
     return connect
@@ -87,5 +88,35 @@ def add_exercise():
 
 
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=5000, debug=True)
+    import sys
+
+    if "test" in sys.argv:
+        import unittest
+
+        class TestCases(unittest.TestCase):
+            def setUp(self):
+                self.app = app.test_client()
+
+            # test with missing data
+            def testAPI(self):
+                response = self.app.get('/api/data')
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(response.json, {"message": "Data send via connection"})
+
+            # normal test
+            def testDBtables(self):
+                response = self.app.get('/testdb')
+                self.assertEqual(response.status_code, 200)
+                self.assertIn("tables", response.json)
+
+            # test adding exercise
+            def testAddExercise(self):
+                response = self.app.post('/api/workouts', json={})
+                self.assertEqual(response.status_code, 400)
+                self.assertIn("workout_id must be provided", response.json["message"])
+
+        unittest.main(argv=['first-arg-is-ignored'], exit=False)
+
+    else:
+        app.run(host="127.0.0.1", port=5000, debug=True)
 

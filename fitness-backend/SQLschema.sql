@@ -1,6 +1,3 @@
--- Create the database
-CREATE DATABASE IF NOT EXISTS FitnessAppDB;
-USE FitnessAppDB;
 
 -- Users table
 CREATE TABLE IF NOT EXISTS Users (
