@@ -95,6 +95,14 @@ _Please contact Nhi for the information on the DB._
 
 pip install -r requirements.txt
 
+### Connect to SQL Server:
+
+1. Navigate to fitness-backend folder
+2. enter the mysql command: mysql -h caboose.proxy.rlwy.net -P 53416 -u root -p --ssl=OFF railway
+3. enter password
+4. YOU'RE IN!
+
+
 ### Start the Flask Sever
 
 ### Start the React Server
