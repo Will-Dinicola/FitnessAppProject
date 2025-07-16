@@ -73,7 +73,7 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/t
 
 ### Create a **_.env_** file in the fitness-backend folder (same location as app.py) & insert the code:
 
-**_to create the .env file, just create a new file and call it .env_**
+_to create the .env file, just create a new file and call it .env_
 
 **CODE:**
 
