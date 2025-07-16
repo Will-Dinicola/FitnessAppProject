@@ -71,7 +71,11 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/t
 
 ## Running the DB
 
-### Create a **_.env_** file in the fitness-backend folder (same location as app.py) with the following code inserted into it:
+### Create a **_.env_** file in the fitness-backend folder (same location as app.py) & insert the code:
+
+**_to create the .env file, just create a new file and call it .env_**
+
+**CODE:**
 
 DB_HOST=your-db-host
 
@@ -83,7 +87,9 @@ DB_PASSWORD=your-db-password
 
 DB_NAME=FitnessAppDB
 
-_Please contact Nhi for the information on the DB_
+
+_Please contact Nhi for the information on the DB._
+
 
 ### Install dependencies:
 
