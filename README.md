@@ -88,7 +88,7 @@ DB_PASSWORD=your-db-password
 DB_NAME=FitnessAppDB
 
 
-_Please contact Nhi for the information on the DB._
+_Please contact Nhi for the information on the DB since these are just placeholders due to security risks._
 
 
 ### Install dependencies:
@@ -98,7 +98,7 @@ pip install -r requirements.txt
 ### Connect to SQL Server:
 
 1. Navigate to fitness-backend folder
-2. enter the mysql command: mysql -h caboose.proxy.rlwy.net -P 53416 -u root -p --ssl=OFF railway
+2. enter the mysql command: mysql -h caboose.proxy.rlwy.net -P 53416 -u root -p --ssl-mode=REQUIRED railway
 3. enter password
 4. YOU'RE IN!
 
