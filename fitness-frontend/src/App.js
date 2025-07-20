@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import "./App.css";
 
 import LoginScreen from "./LoginScreen";
+import TrophyCase from "./TrophyCase";
 
 import blankImg          from "./assets/images/blank.jpg";
 import pushUpImg         from "./assets/images/push-up.jpg";
@@ -61,6 +62,7 @@ function ExerciseSelector({ onSelect }) {
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [view, setView] = useState("workout");
 
   const [selectedExercise, setSelectedExercise] = useState("");
   const [reps, setReps] = useState("");
@@ -161,55 +163,78 @@ function App() {
     );
   }
 
-  return (
+return (
     <div className="App">
-      <h1>Fitness App</h1>
+      
 
-      <ExerciseSelector onSelect={handleExercise} />
-
-      <div className="exercise-image-container">
-        <img
-          src={currentImage}
-          alt={selectedExercise || "No exercise selected"}
-          className="exercise-image"
-        />
-      </div>
-
-      {selectedExercise && (
+      {view === "workout" ? (
         <>
-          <p className="selected-display">
-            Selected exercise: <strong>{selectedExercise}</strong>
-          </p>
-
-          <div className="input-group">
-            <label htmlFor="reps">Reps:</label>
-            <input
-              id="reps"
-              type="number"
-              min="1"
-              value={reps}
-              onChange={(e) => setReps(e.target.value)}
-            />
-          </div>
-
-          <div className="input-group">
-            <label htmlFor="notes">Notes:</label>
-            <textarea
-              id="notes"
-              rows="3"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="How did it feel?"
-            />
-          </div>
-
+        <h1>Exercise Log</h1>
           <button
-            className="save-button"
-            onClick={handleSave}
-            disabled={!selectedExercise || !reps || workoutId === null}
+            className="select-button"
+            onClick={() => setView("trophies")}
           >
-            Save Entry
+            View Trophies
           </button>
+
+          <ExerciseSelector onSelect={handleExercise} />
+
+          <div className="exercise-image-container">
+            <img
+              src={currentImage}
+              alt={selectedExercise || "No exercise selected"}
+              className="exercise-image"
+            />
+          </div>
+
+          {selectedExercise && (
+            <>
+              <p className="selected-display">
+                Selected exercise: <strong>{selectedExercise}</strong>
+              </p>
+
+              <div className="input-group">
+                <label htmlFor="reps">Reps:</label>
+                <input
+                  id="reps"
+                  type="number"
+                  min="1"
+                  value={reps}
+                  onChange={e => setReps(e.target.value)}
+                />
+              </div>
+
+              <div className="input-group">
+                <label htmlFor="notes">Notes:</label>
+                <textarea
+                  id="notes"
+                  rows="3"
+                  value={notes}
+                  onChange={e => setNotes(e.target.value)}
+                  placeholder="How did it feel?"
+                />
+              </div>
+
+              <button
+                className="save-button"
+                onClick={handleSave}
+                disabled={!selectedExercise || !reps || workoutId === null}
+              >
+                Save Entry
+              </button>
+            </>
+          )}
+        </>
+      ) : (
+        <>
+        <h1>Trophy Case</h1>
+          <button
+            className="select-button"
+            onClick={() => setView("workout")}
+          >
+            Back to Workout
+          </button>
+          <TrophyCase />
         </>
       )}
     </div>
