@@ -10,6 +10,7 @@ app = Flask(__name__)
 CORS(app)
 load_dotenv()
 
+
 def get_db_connection():
     connect = mysql.connector.connect(
         host=os.getenv("DB_HOST"),
@@ -20,13 +21,16 @@ def get_db_connection():
     )
     return connect
 
+
 @app.route("/")
 def hello_world():
     return "<p>Hello, World!</p>"
 
+
 @app.route("/api/data")
 def get_data():
     return jsonify({"message": "Data send via connection"})
+
 
 @app.route("/testdb")
 def test_db():
@@ -37,6 +41,7 @@ def test_db():
     cursor.close()
     connect.close()
     return {"tables": [t[0] for t in tables]}
+
 
 @app.route("/api/register", methods=['POST'])
 def register():
@@ -59,12 +64,13 @@ def register():
         connect.commit()
 
     except mysql.connector.errors.IntegrityError:
+        cursor.close()
+        connect.close()
+
         return jsonify({"message": "User already exists"}), 409
 
-    cursor.close()
-    connect.close()
-
     return jsonify({"message": "User registered successful!"}), 201
+
 
 @app.route("/api/login", methods=['POST'])
 def login():
@@ -92,6 +98,25 @@ def login():
 
     return jsonify({"message": "Login successful!", "user_id": user["id"]}), 200
 
+
+@app.route("/api/workouts", methods=['POST'])
+def create_workout():
+    data = request.get_json()
+    user_id = data.get("user_id", 1) # replace with real user logic
+
+    connect = get_db_connection()
+    cursor = connect.cursor()
+
+    cursor.execute("INSERT INTO Workouts (user_id) VALUES (%s)", (user_id,))
+    connect.commit()
+    workout_id = cursor.lastrowid
+
+    cursor.close()
+    connect.close()
+
+    return jsonify({"workout_id": workout_id}), 201
+
+
 @app.route("/api/workouts", methods=["GET"])
 def get_workouts():
     connect = get_db_connection()
@@ -101,6 +126,7 @@ def get_workouts():
     cursor.close()
     connect.close()
     return jsonify(rows), 200
+
 
 @app.route("/api/exercises", methods=["POST"])
 def add_exercise():
@@ -139,6 +165,7 @@ def add_exercise():
     # return success message
     return jsonify({"message": "Exercise logged successfully!"})
 
+
 @app.route("/api/reset-password", methods=["POST"])
 def reset_password():
     data = request.get_json()
@@ -176,6 +203,7 @@ def reset_password():
     connect.close()
 
     return jsonify({"message": "Password updated successfully"})
+
 
 if __name__ == "__main__":
     import sys

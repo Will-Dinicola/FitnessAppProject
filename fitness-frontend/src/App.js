@@ -101,15 +101,28 @@ function App() {
       : blankImg;
 
   useEffect(() => {
+    console.log("📡 GET /api/workouts: fetching without headers");
+
     fetch("/api/workouts")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.length) {
-          setWorkoutId(data[data.length - 1].id);
-        }
-      })
-      .catch(console.error);
-  }, []);
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.length) {
+            setWorkoutId(data[data.length - 1].id);
+          }
+
+          else {
+            return fetch("/api/workouts", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ user_id: 1 })
+            })
+                .then((res) => res.json())
+                .then((created) => setWorkoutId(created.workout_id));
+          }
+        })
+        .catch(console.error);
+    }, []);
+
 
   const handleSave = async () => {
     try {
