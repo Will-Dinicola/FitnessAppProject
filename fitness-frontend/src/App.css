@@ -63,31 +63,55 @@
 
 .container {
   display: flex;
-  justify-content: space-around; 
-  align-items: center; 
+  justify-content: space-around;
+  align-items: center;
   border: 1px solid blue;
   padding: 10px;
 }
 
 
 .exercise-image-container {
-  width: 300px;           
-  height: 300px;  
-  background-color: #fff;       
-  border: 2px solid #000;      
+  width: 300px;
+  height: 300px;
+  background-color: #fff;
+  border: 2px solid #000;
   border-radius: 5px;
-  display: flex;           
+  display: flex;
   justify-content: center;
   align-items: center;
   margin: 1rem auto;
-  overflow: hidden;       
+  overflow: hidden;
 }
 
 .exercise-image {
   width: 100%;
   height: 100%;
-  object-fit: cover;       
+  object-fit: cover;
   display: block;
+}
+
+.forgot-password-btn {
+  margin-top: 10px;
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.forgot-password-btn {
+  margin-top: 10px;
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.forgot-password-btn:hover {
+  text-decoration: underline;
 }
 
 .input-group {
@@ -137,7 +161,7 @@
   border: 1px solid #ccc;
   border-radius: 8px;
   background: #fff;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .login-form .form-group {

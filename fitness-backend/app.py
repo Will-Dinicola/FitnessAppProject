@@ -8,9 +8,7 @@ import os
 
 app = Flask(__name__)
 CORS(app)
-
 load_dotenv()
-
 
 def get_db_connection():
     connect = mysql.connector.connect(
@@ -22,16 +20,13 @@ def get_db_connection():
     )
     return connect
 
-
 @app.route("/")
 def hello_world():
     return "<p>Hello, World!</p>"
 
-
 @app.route("/api/data")
 def get_data():
     return jsonify({"message": "Data send via connection"})
-
 
 @app.route("/testdb")
 def test_db():
@@ -42,7 +37,6 @@ def test_db():
     cursor.close()
     connect.close()
     return {"tables": [t[0] for t in tables]}
-
 
 @app.route("/api/register", methods=['POST'])
 def register():
@@ -72,7 +66,6 @@ def register():
 
     return jsonify({"message": "User registered successful!"}), 201
 
-
 @app.route("/api/login", methods=['POST'])
 def login():
     data = request.get_json()
@@ -99,7 +92,6 @@ def login():
 
     return jsonify({"message": "Login successful!", "user_id": user["id"]}), 200
 
-
 @app.route("/api/workouts", methods=["GET"])
 def get_workouts():
     connect = get_db_connection()
@@ -109,7 +101,6 @@ def get_workouts():
     cursor.close()
     connect.close()
     return jsonify(rows), 200
-
 
 @app.route("/api/exercises", methods=["POST"])
 def add_exercise():
@@ -148,6 +139,43 @@ def add_exercise():
     # return success message
     return jsonify({"message": "Exercise logged successfully!"})
 
+@app.route("/api/reset-password", methods=["POST"])
+def reset_password():
+    data = request.get_json()
+    if not data:
+        return jsonify({"message": "Invalid JSON"}), 400
+
+    email = data.get("email")
+    new_password = data.get("new_password")
+
+    if not email or not new_password:
+        return jsonify({"message": "Email and new password required"}), 400
+
+    connect = get_db_connection()
+    cursor = connect.cursor(dictionary=True)
+
+    # Check if user exists
+    cursor.execute("SELECT id FROM Users WHERE email = %s", (email,))
+    user = cursor.fetchone()
+
+    if not user:
+        cursor.close()
+        connect.close()
+        return jsonify({"message": "Email not found"}), 404
+
+    # Hash the new password
+    hashed_password = generate_password_hash(new_password)
+
+    # Update password in DB
+    cursor.execute(
+        "UPDATE Users SET password = %s WHERE email = %s",
+        (hashed_password, email)
+    )
+    connect.commit()
+    cursor.close()
+    connect.close()
+
+    return jsonify({"message": "Password updated successfully"})
 
 if __name__ == "__main__":
     import sys
