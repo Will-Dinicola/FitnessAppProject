@@ -259,3 +259,39 @@
   opacity: 0;                        
   filter: drop-shadow(0 0 0 #000);   
 }
+.dashboard-container {
+  max-width: 600px;
+  margin: 1.5rem auto;
+  text-align: left;
+}
+
+.workout-card {
+  border: 2px solid #000;
+  border-radius: 5px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background: #fff;
+}
+
+.workout-card h3 {
+  margin-top: 0;
+}
+
+.exercise-entry {
+  margin-bottom: 0.5rem;
+}
+
+.entry-notes {
+  font-style: italic;
+  margin-left: 1rem;
+}
+
+.nav-bar {
+  margin-bottom: 1rem;
+}
+
+.nav-bar button {
+  margin-right: 0.5rem;
+  padding: 8px 12px;
+  cursor: pointer;
+}

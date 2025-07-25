@@ -205,6 +205,48 @@ def reset_password():
     return jsonify({"message": "Password updated successfully"})
 
 
+
+@app.route("/api/dashboard", methods=["GET"])
+def get_dashboard():
+    user_id = request.args.get("user_id", default=1, type=int)
+
+    connect = get_db_connection()
+    cursor = connect.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT
+          W.id AS workout_id,
+          E.name, E.sets, E.reps, E.weight, E.notes
+        FROM Workouts W
+        LEFT JOIN Exercises E ON W.id = E.workout_id
+        WHERE W.user_id = %s
+        ORDER BY W.id, E.id;
+    """, (user_id,))
+    rows = cursor.fetchall()
+    cursor.close()
+    connect.close()
+
+    grouped = {}
+    for row in rows:
+        wid = row["workout_id"]
+        if wid not in grouped:
+            grouped[wid] = []
+        if row["name"] is not None:
+            grouped[wid].append({
+                "name":   row["name"],
+                "sets":   row["sets"],
+                "reps":   row["reps"],
+                "weight": row["weight"],
+                "notes":  row["notes"],
+            })
+
+    result = [
+        {"workout_id": wid, "exercises": exs}
+        for wid, exs in grouped.items()
+    ]
+
+    return jsonify(result), 200
+
+
 if __name__ == "__main__":
     import sys
 

@@ -2,8 +2,10 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
 
+import Dashboard from "./Dashboard"
 import LoginScreen from "./LoginScreen";
 import TrophyCase from "./TrophyCase";
+
 
 import blankImg          from "./assets/images/blank.jpg";
 import pushUpImg         from "./assets/images/push-up.jpg";
@@ -161,93 +163,85 @@ function App() {
     }
   };
 
-  if (!isLoggedIn) {
-    return (
-      <div className="App">
-        <h1>Fitness App</h1>
-        <LoginScreen
-          onLogin={(email, password) => {
-            //This isn't a real login yet its just a dummy one
-            console.log("Logging in:", email, password);
-            setIsLoggedIn(true);
-          }}
-        />
-      </div>
-    );
-  }
-
-return (
+if (!isLoggedIn) {
+  return (
     <div className="App">
-      
+      <h1>Fitness App</h1>
+      <LoginScreen
+        onLogin={async (email, password) => {
+          try {
+            const res = await fetch("/api/login", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email, password })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || res.statusText);
+            setIsLoggedIn(true);
+          } catch (err) {
+            alert("Login failed: " + err.message);
+          }
+        }}
+        onSwitchToSignup={async (email, password) => {
+          try {
+            const res = await fetch("/api/register", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email, password })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || res.statusText);
+            setIsLoggedIn(true);
+          } catch (err) {
+            alert("Signup failed: " + err.message);
+          }
+        }}
+      />
+    </div>
+  );
+}
 
-      {view === "workout" ? (
+  return (
+    <div className="App">
+      <h1>Fitness App</h1>
+      <div className="nav-bar">
+        <button onClick={() => setView("workout")}>Workout</button>
+        <button onClick={() => setView("trophies")}>Trophies</button>
+        <button onClick={() => setView("dashboard")}>Dashboard</button>
+      </div>
+      {view === "workout" && (
         <>
-        <h1>Exercise Log</h1>
-          <button
-            className="select-button"
-            onClick={() => setView("trophies")}
-          >
-            View Trophies
-          </button>
-
+          <h2>Exercise Log</h2>
           <ExerciseSelector onSelect={handleExercise} />
-
           <div className="exercise-image-container">
-            <img
-              src={currentImage}
-              alt={selectedExercise || "No exercise selected"}
-              className="exercise-image"
-            />
+            <img src={currentImage} alt={selectedExercise || "No exercise selected"} className="exercise-image" />
           </div>
-
           {selectedExercise && (
             <>
-              <p className="selected-display">
-                Selected exercise: <strong>{selectedExercise}</strong>
-              </p>
-
+              <p className="selected-display">Selected exercise: <strong>{selectedExercise}</strong></p>
               <div className="input-group">
                 <label htmlFor="reps">Reps:</label>
-                <input
-                  id="reps"
-                  type="number"
-                  min="1"
-                  value={reps}
-                  onChange={e => setReps(e.target.value)}
-                />
+                <input id="reps" type="number" min="1" value={reps} onChange={e => setReps(e.target.value)} />
               </div>
-
               <div className="input-group">
                 <label htmlFor="notes">Notes:</label>
-                <textarea
-                  id="notes"
-                  rows="3"
-                  value={notes}
-                  onChange={e => setNotes(e.target.value)}
-                  placeholder="How did it feel?"
-                />
+                <textarea id="notes" rows="3" value={notes} onChange={e => setNotes(e.target.value)} placeholder="How did it feel?" />
               </div>
-
-              <button
-                className="save-button"
-                onClick={handleSave}
-                disabled={!selectedExercise || !reps || workoutId === null}
-              >
-                Save Entry
-              </button>
+              <button className="save-button" onClick={handleSave} disabled={!selectedExercise || !reps || workoutId === null}>Save Entry</button>
             </>
           )}
         </>
-      ) : (
+      )}
+      {view === "trophies" && (
         <>
-        <h1>Trophy Case</h1>
-          <button
-            className="select-button"
-            onClick={() => setView("workout")}
-          >
-            Back to Workout
-          </button>
+          <h2>Trophy Case</h2>
           <TrophyCase />
+        </>
+      )}
+      {view === "dashboard" && (
+        <>
+          <h2>Dashboard</h2>
+          <Dashboard userId={1} />
         </>
       )}
     </div>
