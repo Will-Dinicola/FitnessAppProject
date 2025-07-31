@@ -105,5 +105,11 @@ pip install -r requirements.txt
 
 ### Start the Flask Sever
 
+Navigate to fitness-backend and run *python app.py*
+
 ### Start the React Server
+
+Navigate to fitness-frontend and run *npm run start*
+
+### The React, Flask, and Database should be open in three separate command line interfaces.
 
