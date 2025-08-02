@@ -1,4 +1,4 @@
-This project was created using **React** for the frontend, **Flask** for the backend, and **MySQL (via Railway)** for the database, to create a fitness tracker and incentivizer to help users achieve their goals
+#This project was created using **React** for the frontend, **Flask** for the backend, and **MySQL (via Railway)** for the database, to create a fitness tracker and incentivizer to help users achieve their goals
 
 # Setup
 
