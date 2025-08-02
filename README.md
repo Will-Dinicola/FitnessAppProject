@@ -7,18 +7,18 @@ Upon booting the app, users will be greeted with a professional-grade login scre
 
 <img src='images/Login.png' width=550>
 
-If the user selects "Forgot Password" they will be greeted with a new window.
+If the user selects **Forgot Password** they will be greeted with a new window.
 
 <img src='images/Reset.png' width=580>
 
-Here they can either proceed with the "Reset Password" button, which will update their credentials in the database.
-Alternatively, the user can return "Back to Login" which will clear the form they are working on, and return back to the homepage.
+Here they can either proceed with the **Reset Password** button, which will update their credentials in the database.
+Alternatively, the user can return **Back to Login** which will clear the form they are working on, and return back to the homepage.
 
 ## Logging Exercises
-Once the user selects "Log In" with proper credentials, they will be met with the largest feature of the app the "Exercise Log"
+Once the user selects **Log In** with proper credentials, they will be met with the largest feature of the app; the **Exercise Log**.
 Here the user can select from a dropdown of a plethora of exercises, select a number of reps performed, and add notes describing the particular instance of the exercise.
 By selecting different exercises from the dropdown, the user will be able to see the muscle groups targeted by the exercise in the display window.
-Upon selecting "Save Entry" the exercise will be logged to the database.
+Upon selecting **Save Entry** the exercise will be logged to the database.
 
 <p float="left">
 <img src='images/Deadlift.png' width=373.7>
@@ -26,8 +26,8 @@ Upon selecting "Save Entry" the exercise will be logged to the database.
 </p>
 
 ## Rewards
-If the user selects "View Trophies" from the "Exercise Log" screen, they will be met with yet enough page, this one showing all of their achievements so far.
-Examples included for viewing include the first trophy for completing an exercise, the fiftieth exercise trophy, and a trophy that has not yet been unlocked by this user!
+If the user selects **View Trophies** from the **Exercise Log** screen, they will be met with another page, this one showing all of their achievements so far.
+Examples included for viewing include the ***first exercise trophy*** for completing an exercise, the ***fiftieth exercise trophy*** for completing fifty exercises, and a trophy that has not yet been unlocked by this user!
 
 <p float="left">
 <img src='images/First.png' width=300>
