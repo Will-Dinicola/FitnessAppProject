@@ -1,7 +1,6 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 from dotenv import load_dotenv
-from flask import request
 from werkzeug.security import generate_password_hash, check_password_hash
 import mysql.connector
 import os
@@ -53,7 +52,6 @@ def register():
     if not email or not password:
         return jsonify({"message": "Email and password are required"}), 400
 
-    # encryption code
     hashed_pw = generate_password_hash(password)
 
     connect = get_db_connection()
@@ -62,12 +60,13 @@ def register():
     try:
         cursor.execute("INSERT INTO Users (name, email, password) VALUES (%s, %s, %s)", (name, email, hashed_pw))
         connect.commit()
-
     except mysql.connector.errors.IntegrityError:
         cursor.close()
         connect.close()
-
         return jsonify({"message": "User already exists"}), 409
+
+    cursor.close()
+    connect.close()
 
     return jsonify({"message": "User registered successful!"}), 201
 
@@ -102,7 +101,7 @@ def login():
 @app.route("/api/workouts", methods=['POST'])
 def create_workout():
     data = request.get_json()
-    user_id = data.get("user_id", 1) # replace with real user logic
+    user_id = data.get("user_id", 1)  # replace with real user logic
 
     connect = get_db_connection()
     cursor = connect.cursor()
@@ -130,14 +129,11 @@ def get_workouts():
 
 @app.route("/api/exercises", methods=["POST"])
 def add_exercise():
-    # get data sent to frontend
     data = request.get_json()
     print("📥 Received from frontend:", data)
 
-    workout_id = data.get("workout_id")  # track this in frontend
+    workout_id = data.get("workout_id")
     name = data.get("name")
-
-    # add stuff to record sets, reps, weight
     sets = data.get("sets")
     reps = data.get("reps")
     weight = data.get("weight")
@@ -146,23 +142,18 @@ def add_exercise():
     if not workout_id or not name:
         return jsonify({"message": "Workout or name must be provided"}), 400
 
-    # connect to DB
     connect = get_db_connection()
     cursor = connect.cursor()
 
-    # insert into DB
     cursor.execute(
         "INSERT INTO Exercises (workout_id, name, sets, reps, weight, notes) VALUES (%s, %s, %s, %s, %s, %s);",
         (workout_id, name, sets, reps, weight, notes)
     )
-
     connect.commit()
 
-    # close connection
     cursor.close()
     connect.close()
 
-    # return success message
     return jsonify({"message": "Exercise logged successfully!"})
 
 
@@ -181,28 +172,30 @@ def reset_password():
     connect = get_db_connection()
     cursor = connect.cursor(dictionary=True)
 
-    # Check if user exists
-    cursor.execute("SELECT id FROM Users WHERE email = %s", (email,))
-    user = cursor.fetchone()
+    try:
+        cursor.execute("SELECT id FROM Users WHERE email = %s", (email,))
+        user = cursor.fetchone()
 
-    if not user:
+        if not user:
+            return jsonify({"message": "Email not found"}), 404
+
+        hashed_password = generate_password_hash(new_password)
+
+        cursor.execute(
+            "UPDATE Users SET password = %s WHERE email = %s",
+            (hashed_password, email)
+        )
+        connect.commit()
+
+    except Exception as e:
+        print("Error during password reset:", e)
+        return jsonify({"message": "Internal server error"}), 500
+
+    finally:
         cursor.close()
         connect.close()
-        return jsonify({"message": "Email not found"}), 404
 
-    # Hash the new password
-    hashed_password = generate_password_hash(new_password)
-
-    # Update password in DB
-    cursor.execute(
-        "UPDATE Users SET password = %s WHERE email = %s",
-        (hashed_password, email)
-    )
-    connect.commit()
-    cursor.close()
-    connect.close()
-
-    return jsonify({"message": "Password updated successfully"})
+    return jsonify({"message": "Password updated successfully"}), 200
 
 
 if __name__ == "__main__":
@@ -215,19 +208,16 @@ if __name__ == "__main__":
             def setUp(self):
                 self.app = app.test_client()
 
-            # test with missing data
             def testAPI(self):
                 response = self.app.get('/api/data')
                 self.assertEqual(response.status_code, 200)
                 self.assertEqual(response.json, {"message": "Data send via connection"})
 
-            # normal test
             def testDBtables(self):
                 response = self.app.get('/testdb')
                 self.assertEqual(response.status_code, 200)
                 self.assertIn("tables", response.json)
 
-            # test adding exercise
             def testAddExercise(self):
                 response = self.app.post('/api/workouts', json={})
                 self.assertEqual(response.status_code, 400)

@@ -1,0 +1,5 @@
+DB_HOST=caboose.proxy.rlwy.net
+DB_PORT=53416
+DB_USER=root
+DB_PASSWORD=hmYWITDjgmkOYDFBOjApTdkMdkOIhGRD
+DB_NAME=railway

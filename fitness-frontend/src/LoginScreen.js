@@ -17,14 +17,37 @@ export default function LoginScreen({ onLogin, onSwitchToSignup }) {
 
   const handleForgotSubmit = async (e) => {
     e.preventDefault();
-    // Call your API endpoint here
-    const res = await fetch("/api/reset-password", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: resetEmail, new_password: resetPass }),
-    });
-    const data = await res.json();
-    setMessage(data.message || "Check your email");
+
+    try {
+      const res = await fetch("/api/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: resetEmail,
+          new_password: resetPass
+        }),
+      });
+
+      const text = await res.text(); // safer for debugging
+
+      try {
+        const data = JSON.parse(text);
+        setMessage(data.message || "Password reset, check your email");
+      } catch (err) {
+        console.error("Server did not return valid JSON:", text);
+        setMessage("Server returned invalid response. Please try again.");
+      }
+    } catch (err) {
+      console.error("Network or server error:", err);
+      setMessage("Something went wrong. Please try again.");
+    }
+  };
+
+  const handleBackToLogin = () => {
+    setResetEmail("");
+    setResetPass("");
+    setMessage("");
+    setShowForgot(false);
   };
 
   return (
@@ -95,7 +118,7 @@ export default function LoginScreen({ onLogin, onSwitchToSignup }) {
           </form>
           {message && <p>{message}</p>}
 
-          <button type="button" onClick={() => setShowForgot(false)}>
+          <button type="button" onClick={handleBackToLogin}>
             Back to Login
           </button>
         </>
