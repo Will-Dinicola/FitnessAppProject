@@ -10,65 +10,42 @@ app = Flask(__name__)
 CORS(app)
 
 def get_db_connection():
-    connect = mysql.connector.connect(
+    return mysql.connector.connect(
         host=os.getenv("DB_HOST"),
         port=int(os.getenv("DB_PORT")),
         user=os.getenv("DB_USER"),
         password=os.getenv("DB_PASSWORD"),
         database=os.getenv("DB_NAME")
     )
-    return connect
-
-
-@app.route("/")
-def hello_world():
-    return "<p>Hello, World!</p>"
-
-
-@app.route("/api/data")
-def get_data():
-    return jsonify({"message": "Data send via connection"})
-
-
-@app.route("/testdb")
-def test_db():
-    connect = get_db_connection()
-    cursor = connect.cursor()
-    cursor.execute("SHOW TABLES;")
-    tables = cursor.fetchall()
-    cursor.close()
-    connect.close()
-    return {"tables": [t[0] for t in tables]}
-
 
 @app.route("/api/register", methods=['POST'])
 def register():
     data = request.get_json()
     email = data.get("email")
     password = data.get("password")
-    name = data.get("name", '')
+    name = data.get("name", "")
 
     if not email or not password:
         return jsonify({"message": "Email and password are required"}), 400
 
     hashed_pw = generate_password_hash(password)
-
-    connect = get_db_connection()
-    cursor = connect.cursor()
+    conn = get_db_connection()
+    cursor = conn.cursor()
 
     try:
-        cursor.execute("INSERT INTO Users (name, email, password) VALUES (%s, %s, %s)", (name, email, hashed_pw))
-        connect.commit()
+        cursor.execute(
+            "INSERT INTO Users (name, email, password) VALUES (%s, %s, %s)",
+            (name, email, hashed_pw)
+        )
+        conn.commit()
     except mysql.connector.errors.IntegrityError:
         cursor.close()
-        connect.close()
+        conn.close()
         return jsonify({"message": "User already exists"}), 409
 
     cursor.close()
-    connect.close()
-
+    conn.close()
     return jsonify({"message": "User registered successful!"}), 201
-
 
 @app.route("/api/login", methods=['POST'])
 def login():
@@ -79,58 +56,49 @@ def login():
     if not email or not password:
         return jsonify({"message": "Email and password are required"}), 400
 
-    connect = get_db_connection()
-    cursor = connect.cursor(dictionary=True)
-
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
     cursor.execute("SELECT * FROM Users WHERE email = %s", (email,))
     user = cursor.fetchone()
-
     cursor.close()
-    connect.close()
+    conn.close()
 
     if not user:
         return jsonify({"message": "User does not exist"}), 404
-
     if not check_password_hash(user["password"], password):
         return jsonify({"message": "Invalid password"}), 401
 
     return jsonify({"message": "Login successful!", "user_id": user["id"]}), 200
 
-
 @app.route("/api/workouts", methods=['POST'])
 def create_workout():
     data = request.get_json()
-    user_id = data.get("user_id", 1)  # replace with real user logic
+    email = data.get("email")
+    if not email:
+        return jsonify({"message": "Email is required"}), 400
 
-    connect = get_db_connection()
-    cursor = connect.cursor()
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    # lookup user by email
+    cursor.execute("SELECT id FROM Users WHERE email = %s", (email,))
+    row = cursor.fetchone()
+    if not row:
+        cursor.close()
+        conn.close()
+        return jsonify({"message": "User not found"}), 404
+    user_id = row[0]
 
     cursor.execute("INSERT INTO Workouts (user_id) VALUES (%s)", (user_id,))
-    connect.commit()
+    conn.commit()
     workout_id = cursor.lastrowid
-
     cursor.close()
-    connect.close()
+    conn.close()
 
     return jsonify({"workout_id": workout_id}), 201
-
-
-@app.route("/api/workouts", methods=["GET"])
-def get_workouts():
-    connect = get_db_connection()
-    cursor = connect.cursor(dictionary=True)
-    cursor.execute("SELECT id FROM Workouts;")
-    rows = cursor.fetchall()
-    cursor.close()
-    connect.close()
-    return jsonify(rows), 200
-
 
 @app.route("/api/exercises", methods=["POST"])
 def add_exercise():
     data = request.get_json()
-    print("📥 Received from frontend:", data)
-
     workout_id = data.get("workout_id")
     name = data.get("name")
     sets = data.get("sets")
@@ -139,21 +107,20 @@ def add_exercise():
     notes = data.get("notes")
 
     if not workout_id or not name:
-        return jsonify({"message": "Workout or name must be provided"}), 400
+        return jsonify({"message": "Workout ID and name are required"}), 400
 
-    connect = get_db_connection()
-    cursor = connect.cursor()
-
+    conn = get_db_connection()
+    cursor = conn.cursor()
     cursor.execute(
-        "INSERT INTO Exercises (workout_id, name, sets, reps, weight, notes) VALUES (%s, %s, %s, %s, %s, %s);",
+        "INSERT INTO Exercises (workout_id, name, sets, reps, weight, notes) "
+        "VALUES (%s, %s, %s, %s, %s, %s)",
         (workout_id, name, sets, reps, weight, notes)
     )
-    connect.commit()
-
+    conn.commit()
     cursor.close()
-    connect.close()
+    conn.close()
 
-    return jsonify({"message": "Exercise logged successfully!"})
+    return jsonify({"message": "Exercise logged successfully!"}), 201
 
 
 @app.route("/api/reset-password", methods=["POST"])
@@ -195,6 +162,62 @@ def reset_password():
         connect.close()
 
     return jsonify({"message": "Password updated successfully"}), 200
+
+
+@app.route("/api/dashboard", methods=["GET"])
+def get_dashboard():
+    email = request.args.get("email")
+    if not email:
+        return jsonify({"message":"Email is required"}), 400
+
+    conn = get_db_connection()
+    cur  = conn.cursor(dictionary=True)
+
+    # join Users→Workouts→Exercises, filtering by email
+    cur.execute("""
+      SELECT
+        W.id          AS workout_id,
+        W.date        AS workout_date,
+        E.id          AS exercise_id,
+        E.name        AS exercise_name,
+        E.sets,
+        E.reps,
+        E.weight,
+        E.notes
+      FROM Workouts W
+      JOIN Users U    ON U.id = W.user_id
+      LEFT JOIN Exercises E ON E.workout_id = W.id
+      WHERE U.email = %s
+      ORDER BY W.date DESC, E.id;
+    """, (email,))
+
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+
+    # group by workout
+    from collections import defaultdict
+    grouped = defaultdict(lambda: {"date": None, "exercises": []})
+    for r in rows:
+        wid = r["workout_id"]
+        if grouped[wid]["date"] is None:
+            grouped[wid]["date"] = r["workout_date"]
+        if r["exercise_id"] is not None:
+            grouped[wid]["exercises"].append({
+              "id":     r["exercise_id"],
+              "name":   r["exercise_name"],
+              "sets":   r["sets"],
+              "reps":   r["reps"],
+              "weight": r["weight"],
+              "notes":  r["notes"],
+            })
+
+    # build result list
+    result = [
+      {"workout_id": wid, "date": info["date"], "exercises": info["exercises"]}
+      for wid, info in grouped.items()
+    ]
+    return jsonify(result), 200
 
 
 if __name__ == "__main__":
