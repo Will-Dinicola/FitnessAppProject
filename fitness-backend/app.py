@@ -1,14 +1,13 @@
+from dotenv import load_dotenv
+load_dotenv()
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
 import mysql.connector
 import os
 
 app = Flask(__name__)
 CORS(app)
-load_dotenv()
-
 
 def get_db_connection():
     connect = mysql.connector.connect(

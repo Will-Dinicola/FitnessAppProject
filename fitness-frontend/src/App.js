@@ -1,4 +1,3 @@
-/* jshint esversion: 6 */
 import React, { useState, useEffect } from "react";
 import "./App.css";
 
@@ -50,10 +49,7 @@ function ExerciseSelector({ onSelect }) {
           </option>
         ))}
       </select>
-      <button
-        className="select-button"
-        onClick={() => onSelect(chosen)}
-      >
+      <button className="select-button" onClick={() => onSelect(chosen)}>
         Select Exercise
       </button>
     </div>
@@ -82,19 +78,19 @@ function App() {
     "Tricep Dip": tricepDipImg,
   };
 
-    const handleExercise = exercise => {
-      const img = exerciseImages[exercise];
-      if (exercise && img) {
-        console.log(`Selected exercise: ${exercise}`);
-        const filename = img.split("/").pop();
-        console.log(`Image displayed: ${filename}`);
-        console.log("Inputs visible: Reps field, Notes textarea");
-      } else {
-        console.error("FAIL");
-      }
-      setSelectedExercise(exercise);
-      setReps("");
-      setNotes("");
+  const handleExercise = (exercise) => {
+    const img = exerciseImages[exercise];
+    if (exercise && img) {
+      console.log(`Selected exercise: ${exercise}`);
+      const filename = img.split("/").pop();
+      console.log(`Image displayed: ${filename}`);
+      console.log("Inputs visible: Reps field, Notes textarea");
+    } else {
+      console.error("FAIL");
+    }
+    setSelectedExercise(exercise);
+    setReps("");
+    setNotes("");
   };
 
   const currentImage =
@@ -103,28 +99,23 @@ function App() {
       : blankImg;
 
   useEffect(() => {
-    console.log("📡 GET /api/workouts: fetching without headers");
-
     fetch("/api/workouts")
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.length) {
-            setWorkoutId(data[data.length - 1].id);
-          }
-
-          else {
-            return fetch("/api/workouts", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ user_id: 1 })
-            })
-                .then((res) => res.json())
-                .then((created) => setWorkoutId(created.workout_id));
-          }
-        })
-        .catch(console.error);
-    }, []);
-
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.length) {
+          setWorkoutId(data[data.length - 1].id);
+        } else {
+          return fetch("/api/workouts", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ user_id: 1 }),
+          })
+            .then((res) => res.json())
+            .then((created) => setWorkoutId(created.workout_id));
+        }
+      })
+      .catch(console.error);
+  }, []);
 
   const handleSave = async () => {
     try {
@@ -151,7 +142,6 @@ function App() {
       const { message } = await res.json();
       alert(message);
 
-      // Reset UI
       setSelectedExercise("");
       setReps("");
       setNotes("");
@@ -166,32 +156,48 @@ function App() {
       <div className="App">
         <h1>Fitness App</h1>
         <LoginScreen
-          onLogin={(email, password) => {
-            //This isn't a real login yet its just a dummy one
-            console.log("Logging in:", email, password);
-            setIsLoggedIn(true);
+          onLogin={async (email, password) => {
+            try {
+              const res = await fetch("/api/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password }),
+              });
+              const data = await res.json();
+              if (!res.ok) throw new Error(data.message || res.statusText);
+              setIsLoggedIn(true);
+            } catch (err) {
+              alert("Login failed: " + err.message);
+            }
+          }}
+          onSwitchToSignup={async (email, password) => {
+            try {
+              const res = await fetch("/api/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password }),
+              });
+              const data = await res.json();
+              if (!res.ok) throw new Error(data.message || res.statusText);
+              setIsLoggedIn(true);
+            } catch (err) {
+              alert("Signup failed: " + err.message);
+            }
           }}
         />
       </div>
     );
   }
 
-return (
+  return (
     <div className="App">
-      
-
       {view === "workout" ? (
         <>
-        <h1>Exercise Log</h1>
-          <button
-            className="select-button"
-            onClick={() => setView("trophies")}
-          >
+          <h1>Exercise Log</h1>
+          <button className="select-button" onClick={() => setView("trophies")}>
             View Trophies
           </button>
-
           <ExerciseSelector onSelect={handleExercise} />
-
           <div className="exercise-image-container">
             <img
               src={currentImage}
@@ -199,13 +205,11 @@ return (
               className="exercise-image"
             />
           </div>
-
           {selectedExercise && (
             <>
               <p className="selected-display">
                 Selected exercise: <strong>{selectedExercise}</strong>
               </p>
-
               <div className="input-group">
                 <label htmlFor="reps">Reps:</label>
                 <input
@@ -213,21 +217,19 @@ return (
                   type="number"
                   min="1"
                   value={reps}
-                  onChange={e => setReps(e.target.value)}
+                  onChange={(e) => setReps(e.target.value)}
                 />
               </div>
-
               <div className="input-group">
                 <label htmlFor="notes">Notes:</label>
                 <textarea
                   id="notes"
                   rows="3"
                   value={notes}
-                  onChange={e => setNotes(e.target.value)}
+                  onChange={(e) => setNotes(e.target.value)}
                   placeholder="How did it feel?"
                 />
               </div>
-
               <button
                 className="save-button"
                 onClick={handleSave}
@@ -240,11 +242,8 @@ return (
         </>
       ) : (
         <>
-        <h1>Trophy Case</h1>
-          <button
-            className="select-button"
-            onClick={() => setView("workout")}
-          >
+          <h1>Trophy Case</h1>
+          <button className="select-button" onClick={() => setView("workout")}>
             Back to Workout
           </button>
           <TrophyCase />
