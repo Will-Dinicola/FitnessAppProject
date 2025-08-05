@@ -1,9 +1,11 @@
+/* jshint esversion: 6 */
 import React, { useState, useEffect } from "react";
 import "./App.css";
 
-import LoginScreen from "./LoginScreen";
-import TrophyCase  from "./TrophyCase";
-import Dashboard   from "./Dashboard";
+import LoginScreen     from "./LoginScreen";
+import TrophyCase      from "./TrophyCase";
+import Dashboard       from "./Dashboard";
+import UserManagement from "./UserManagement";
 
 import blankImg          from "./assets/images/blank.jpg";
 import pushUpImg         from "./assets/images/push-up.jpg";
@@ -48,14 +50,15 @@ function ExerciseSelector({ onSelect }) {
 }
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn]     = useState(false);
-  const [userEmail, setUserEmail]       = useState("");
-  const [view, setView]                 = useState("workout");
+  const [isLoggedIn, setIsLoggedIn]       = useState(false);
+  const [userEmail, setUserEmail]         = useState("");
+  const [userRole, setUserRole]           = useState("member");
+  const [view, setView]                   = useState("workout");
   const [selectedExercise, setSelectedExercise] = useState("");
-  const [reps, setReps]                 = useState("");
-  const [weight, setWeight]             = useState("");
-  const [notes, setNotes]               = useState("");
-  const [workoutId, setWorkoutId]       = useState(null);
+  const [reps, setReps]                   = useState("");
+  const [weight, setWeight]               = useState("");
+  const [notes, setNotes]                 = useState("");
+  const [workoutId, setWorkoutId]         = useState(null);
 
   const exerciseImages = {
     "Push-Up": pushUpImg, Squat: squatImg, "Bench Press": benchPressImg,
@@ -64,11 +67,11 @@ function App() {
     "Bicep Curl": bicepCurlImg, "Tricep Dip": tricepDipImg,
   };
 
+  // when an exercise is chosen
   const handleExercise = exercise => {
-    const img = exerciseImages[exercise];
-    if (exercise && img) {
+    if (exercise && exerciseImages[exercise]) {
       console.log(`Selected exercise: ${exercise}`);
-      console.log(`Image displayed: ${img.split("/").pop()}`);
+      console.log(`Image displayed: ${exerciseImages[exercise].split("/").pop()}`);
       console.log("Inputs visible: Reps field, Weight field, Notes textarea");
     } else {
       console.error("FAIL");
@@ -79,10 +82,12 @@ function App() {
     setNotes("");
   };
 
+  // current image or blank
   const currentImage = selectedExercise && exerciseImages[selectedExercise]
     ? exerciseImages[selectedExercise]
     : blankImg;
 
+  // create/fetch workout on login
   useEffect(() => {
     if (!userEmail) return;
     fetch("/api/workouts", {
@@ -95,6 +100,7 @@ function App() {
       .catch(console.error);
   }, [userEmail]);
 
+  // save an exercise entry
   const handleSave = async () => {
     try {
       const payload = {
@@ -126,13 +132,14 @@ function App() {
     }
   };
 
+  // not logged in → show login/signup
   if (!isLoggedIn) {
     return (
       <div className="App">
         <h1>Fitness App</h1>
         <LoginScreen
           onLogin={async (email, password) => {
-            const res = await fetch("/api/login", {
+            const res  = await fetch("/api/login", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ email, password })
@@ -144,9 +151,10 @@ function App() {
             }
             setIsLoggedIn(true);
             setUserEmail(email);
+            setUserRole(data.role);
           }}
           onSwitchToSignup={async (email, password) => {
-            const res = await fetch("/api/register", {
+            const res  = await fetch("/api/register", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ email, password })
@@ -158,20 +166,24 @@ function App() {
             }
             setIsLoggedIn(true);
             setUserEmail(email);
+            setUserRole("member");  // new users default to member
           }}
         />
       </div>
     );
   }
 
+  // main app UI
   return (
     <div className="App">
+      {/* logout */}
       <div className="logout-container">
         <button
           className="view-button"
           onClick={() => {
             setIsLoggedIn(false);
             setUserEmail("");
+            setUserRole("member");
             setView("workout");
           }}
         >
@@ -179,23 +191,31 @@ function App() {
         </button>
       </div>
 
+      {/* navigation */}
+      <div className="view-buttons">
+        <button className="view-button" onClick={() => setView("workout")}>
+          Workout
+        </button>
+        <button className="view-button" onClick={() => setView("trophies")}>
+          Trophies
+        </button>
+        <button className="view-button" onClick={() => setView("dashboard")}>
+          Dashboard
+        </button>
+        {userRole === "admin" && (
+          <button
+            className="view-button"
+            onClick={() => setView("admin")}
+          >
+            Administration
+          </button>
+        )}
+      </div>
+
+      {/* views */}
       {view === "workout" && (
         <>
           <h1>Exercise Log</h1>
-          <div className="view-buttons">
-            <button
-              className="view-button"
-              onClick={() => setView("trophies")}
-            >
-              Trophies
-            </button>
-            <button
-              className="view-button"
-              onClick={() => setView("dashboard")}
-            >
-              Dashboard
-            </button>
-          </div>
           <ExerciseSelector onSelect={handleExercise} />
           <div className="exercise-image-container">
             <img
@@ -250,44 +270,25 @@ function App() {
           )}
         </>
       )}
+
       {view === "trophies" && (
         <>
           <h1>Trophy Case</h1>
-          <div className="view-buttons">
-            <button
-              className="view-button"
-              onClick={() => setView("workout")}
-            >
-              Workout
-            </button>
-            <button
-              className="view-button"
-              onClick={() => setView("dashboard")}
-            >
-              Dashboard
-            </button>
-          </div>
-          <TrophyCase userEmail={userEmail}/>
+          <TrophyCase userEmail={userEmail} />
         </>
       )}
+
       {view === "dashboard" && (
         <>
           <h1>Dashboard</h1>
-          <div className="view-buttons">
-            <button
-              className="view-button"
-              onClick={() => setView("workout")}
-            >
-              Workout
-            </button>
-            <button
-              className="view-button"
-              onClick={() => setView("trophies")}
-            >
-              Trophies
-            </button>
-          </div>
           <Dashboard userEmail={userEmail} />
+        </>
+      )}
+
+      {view === "admin" && userRole === "admin" && (
+        <>
+          <h1>User Management</h1>
+          <UserManagement adminEmail={userEmail} />
         </>
       )}
     </div>
