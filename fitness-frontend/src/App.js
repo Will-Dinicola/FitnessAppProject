@@ -166,6 +166,19 @@ function App() {
 
   return (
     <div className="App">
+      <div className="logout-container">
+        <button
+          className="view-button"
+          onClick={() => {
+            setIsLoggedIn(false);
+            setUserEmail("");
+            setView("workout");
+          }}
+        >
+          Logout
+        </button>
+      </div>
+
       {view === "workout" && (
         <>
           <h1>Exercise Log</h1>
@@ -240,30 +253,40 @@ function App() {
       {view === "trophies" && (
         <>
           <h1>Trophy Case</h1>
-          <button
-            className="select-button"
-            onClick={() => setView("workout")}
-          >
-            Back to Workout
-          </button>
-          <button
-            className="select-button"
-            onClick={() => setView("dashboard")}
-          >
-            Go to Dashboard
-          </button>
+          <div className="view-buttons">
+            <button
+              className="view-button"
+              onClick={() => setView("workout")}
+            >
+              Workout
+            </button>
+            <button
+              className="view-button"
+              onClick={() => setView("dashboard")}
+            >
+              Dashboard
+            </button>
+          </div>
           <TrophyCase userEmail={userEmail}/>
         </>
       )}
       {view === "dashboard" && (
         <>
           <h1>Dashboard</h1>
-          <button
-            className="select-button"
-            onClick={() => setView("workout")}
-          >
-            Back to Workout
-          </button>
+          <div className="view-buttons">
+            <button
+              className="view-button"
+              onClick={() => setView("workout")}
+            >
+              Workout
+            </button>
+            <button
+              className="view-button"
+              onClick={() => setView("trophies")}
+            >
+              Trophies
+            </button>
+          </div>
           <Dashboard userEmail={userEmail} />
         </>
       )}
