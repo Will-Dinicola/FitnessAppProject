@@ -1,16 +1,21 @@
 import React, { useState } from "react";
 
+// LoginScreen handles login, signup toggle, and password reset flows
 export default function LoginScreen({ onLogin, onSwitchToSignup }) {
-  const [email, setEmail] = useState("");
+  // form fields for login/signup
+  const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
 
+  // control whether to show "forgot password" form
   const [showForgot, setShowForgot] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
-  const [resetPass, setResetPass] = useState("");
-  const [message, setMessage] = useState("");
+  const [resetPass, setResetPass]   = useState("");
+  const [message, setMessage]       = useState("");
 
+  // toggle between login and signup
   const [showSignup, setShowSignup] = useState(false);
 
+  // handle login or signup submission
   const submit = (e) => {
     e.preventDefault();
     if (showSignup) {
@@ -20,6 +25,7 @@ export default function LoginScreen({ onLogin, onSwitchToSignup }) {
     }
   };
 
+  // send password reset request to backend
   const handleForgotSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -43,6 +49,7 @@ export default function LoginScreen({ onLogin, onSwitchToSignup }) {
     }
   };
 
+  // return to login view and clear reset/signup state
   const handleBackToLogin = () => {
     setShowForgot(false);
     setShowSignup(false);
@@ -54,6 +61,7 @@ export default function LoginScreen({ onLogin, onSwitchToSignup }) {
   return (
     <div className="login-container">
       {showForgot ? (
+        // Forgot Password form
         <>
           <h2>Reset Password</h2>
           <form onSubmit={handleForgotSubmit}>
@@ -61,14 +69,14 @@ export default function LoginScreen({ onLogin, onSwitchToSignup }) {
               type="email"
               placeholder="Enter your email"
               value={resetEmail}
-              onChange={(e) => setResetEmail(e.target.value)}
+              onChange={e => setResetEmail(e.target.value)}
               required
             />
             <input
               type="password"
               placeholder="Enter new password"
               value={resetPass}
-              onChange={(e) => setResetPass(e.target.value)}
+              onChange={e => setResetPass(e.target.value)}
               required
             />
             <button type="submit">Reset Password</button>
@@ -79,6 +87,7 @@ export default function LoginScreen({ onLogin, onSwitchToSignup }) {
           </button>
         </>
       ) : showSignup ? (
+        // Signup form
         <>
           <h2>Sign Up</h2>
           <form className="login-form" onSubmit={submit}>
@@ -88,7 +97,7 @@ export default function LoginScreen({ onLogin, onSwitchToSignup }) {
                 id="email"
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={e => setEmail(e.target.value)}
                 required
               />
             </div>
@@ -98,7 +107,7 @@ export default function LoginScreen({ onLogin, onSwitchToSignup }) {
                 id="password"
                 type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={e => setPassword(e.target.value)}
                 required
               />
             </div>
@@ -114,6 +123,7 @@ export default function LoginScreen({ onLogin, onSwitchToSignup }) {
           </p>
         </>
       ) : (
+        // Default Login form
         <>
           <h2>Log In</h2>
           <form className="login-form" onSubmit={submit}>
@@ -123,7 +133,7 @@ export default function LoginScreen({ onLogin, onSwitchToSignup }) {
                 id="email"
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={e => setEmail(e.target.value)}
                 required
               />
             </div>
@@ -133,7 +143,7 @@ export default function LoginScreen({ onLogin, onSwitchToSignup }) {
                 id="password"
                 type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={e => setPassword(e.target.value)}
                 required
               />
             </div>

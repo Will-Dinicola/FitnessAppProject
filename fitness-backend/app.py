@@ -11,6 +11,7 @@ from collections import defaultdict
 app = Flask(__name__)
 CORS(app)
 
+# Open a new database connection using environment variables
 def get_db_connection():
     return mysql.connector.connect(
         host=os.getenv("DB_HOST"),
@@ -20,6 +21,7 @@ def get_db_connection():
         database=os.getenv("DB_NAME")
     )
 
+# Register a new user
 @app.route("/api/register", methods=['POST'])
 def register():
     data = request.get_json()
@@ -30,6 +32,7 @@ def register():
     if not email or not password:
         return jsonify({"message": "Email and password are required"}), 400
 
+    # hash the password before storing
     hashed_pw = generate_password_hash(password)
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -41,6 +44,7 @@ def register():
         )
         conn.commit()
     except mysql.connector.errors.IntegrityError:
+        # duplicate email
         cursor.close()
         conn.close()
         return jsonify({"message": "User already exists"}), 409
@@ -49,6 +53,7 @@ def register():
     conn.close()
     return jsonify({"message": "User registered successful!"}), 201
 
+# Log in an existing user
 @app.route("/api/login", methods=['POST'])
 def login():
     data = request.get_json()
@@ -72,12 +77,14 @@ def login():
     if not check_password_hash(user["password"], password):
         return jsonify({"message": "Invalid password"}), 401
 
+    # return the user's role so frontend can show admin features
     return jsonify({
         "message": "Login successful!",
         "user_id": user["id"],
         "role":    user.get("role", "member")
     }), 200
 
+# Helper to check if a given email belongs to an admin
 def require_admin(email):
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
@@ -87,6 +94,7 @@ def require_admin(email):
     conn.close()
     return row and row.get("role") == "admin"
 
+# List all users (admin only)
 @app.route("/api/users", methods=["GET"])
 def list_users():
     admin_email = request.args.get("email")
@@ -105,6 +113,7 @@ def list_users():
     conn.close()
     return jsonify(users), 200
 
+# Delete a user by ID (admin only)
 @app.route("/api/users/<int:uid>", methods=["DELETE"])
 def delete_user(uid):
     admin_email = request.args.get("email")
@@ -119,6 +128,7 @@ def delete_user(uid):
     conn.close()
     return jsonify({"message": "User deleted"}), 200
 
+# Toggle a user's disabled state (admin only)
 @app.route("/api/users/<int:uid>/disable", methods=["PATCH"])
 def toggle_disable(uid):
     admin_email = request.args.get("email")
@@ -136,6 +146,7 @@ def toggle_disable(uid):
     conn.close()
     return jsonify({"message": "User disable toggled"}), 200
 
+# Change a user's role between member/admin (admin only)
 @app.route("/api/users/<int:uid>/role", methods=["PATCH"])
 def change_role(uid):
     admin_email = request.args.get("email")
@@ -158,6 +169,7 @@ def change_role(uid):
     conn.close()
     return jsonify({"message": "Role updated"}), 200
 
+# Create a new workout entry for a user
 @app.route("/api/workouts", methods=['POST'])
 def create_workout():
     data = request.get_json()
@@ -182,6 +194,7 @@ def create_workout():
     conn.close()
     return jsonify({"workout_id": workout_id}), 201
 
+# Add an exercise record to a specific workout
 @app.route("/api/exercises", methods=["POST"])
 def add_exercise():
     data = request.get_json()
@@ -207,6 +220,7 @@ def add_exercise():
     conn.close()
     return jsonify({"message": "Exercise logged successfully!"}), 201
 
+# Reset a user's password given their email
 @app.route("/api/reset-password", methods=["POST"])
 def reset_password():
     data = request.get_json()
@@ -238,6 +252,7 @@ def reset_password():
     conn.close()
     return jsonify({"message": "Password updated successfully"}), 200
 
+# Retrieve all workouts and exercises for a user, grouped by workout
 @app.route("/api/dashboard", methods=["GET"])
 def get_dashboard():
     email = request.args.get("email")
@@ -266,6 +281,7 @@ def get_dashboard():
     cur.close()
     conn.close()
 
+    # group exercises under each workout
     grouped = defaultdict(lambda: {"date": None, "exercises": []})
     for r in rows:
         wid = r["workout_id"]
@@ -287,6 +303,7 @@ def get_dashboard():
     ]
     return jsonify(result), 200
 
+# Run tests or start the server
 if __name__ == "__main__":
     import sys
     if "test" in sys.argv:

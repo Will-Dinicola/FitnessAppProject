@@ -19,6 +19,7 @@ import plankImg          from "./assets/images/plank.jpg";
 import bicepCurlImg      from "./assets/images/bicep-curl.jpg";
 import tricepDipImg      from "./assets/images/tricep-dip.jpg";
 
+// Dropdown selector for exercises
 function ExerciseSelector({ onSelect }) {
   const exercises = [
     "Push-Up","Squat","Bench Press","Deadlift",
@@ -26,6 +27,7 @@ function ExerciseSelector({ onSelect }) {
     "Bicep Curl","Tricep Dip",
   ];
   const [chosen, setChosen] = useState("");
+
   return (
     <div className="selector-container">
       <label htmlFor="exercise" className="selector-label">
@@ -50,16 +52,22 @@ function ExerciseSelector({ onSelect }) {
 }
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn]       = useState(false);
-  const [userEmail, setUserEmail]         = useState("");
-  const [userRole, setUserRole]           = useState("member");
-  const [view, setView]                   = useState("workout");
-  const [selectedExercise, setSelectedExercise] = useState("");
-  const [reps, setReps]                   = useState("");
-  const [weight, setWeight]               = useState("");
-  const [notes, setNotes]                 = useState("");
-  const [workoutId, setWorkoutId]         = useState(null);
+  // user authentication state
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userEmail, setUserEmail]   = useState("");
+  const [userRole, setUserRole]     = useState("member");
 
+  // which view to show
+  const [view, setView]                   = useState("workout");
+
+  // workout logging state
+  const [selectedExercise, setSelectedExercise] = useState("");
+  const [reps, setReps]       = useState("");
+  const [weight, setWeight]   = useState("");
+  const [notes, setNotes]     = useState("");
+  const [workoutId, setWorkoutId] = useState(null);
+
+  // map exercises to images
   const exerciseImages = {
     "Push-Up": pushUpImg, Squat: squatImg, "Bench Press": benchPressImg,
     Deadlift: deadliftImg, "Overhead Press": overheadPressImg,
@@ -67,27 +75,20 @@ function App() {
     "Bicep Curl": bicepCurlImg, "Tricep Dip": tricepDipImg,
   };
 
-  // when an exercise is chosen
+  // handle selecting an exercise
   const handleExercise = exercise => {
-    if (exercise && exerciseImages[exercise]) {
-      console.log(`Selected exercise: ${exercise}`);
-      console.log(`Image displayed: ${exerciseImages[exercise].split("/").pop()}`);
-      console.log("Inputs visible: Reps field, Weight field, Notes textarea");
-    } else {
-      console.error("FAIL");
-    }
     setSelectedExercise(exercise);
     setReps("");
     setWeight("");
     setNotes("");
   };
 
-  // current image or blank
+  // decide which image to show
   const currentImage = selectedExercise && exerciseImages[selectedExercise]
     ? exerciseImages[selectedExercise]
     : blankImg;
 
-  // create/fetch workout on login
+  // when user logs in, create or fetch a workout
   useEffect(() => {
     if (!userEmail) return;
     fetch("/api/workouts", {
@@ -100,7 +101,7 @@ function App() {
       .catch(console.error);
   }, [userEmail]);
 
-  // save an exercise entry
+  // save the current exercise entry
   const handleSave = async () => {
     try {
       const payload = {
@@ -132,7 +133,7 @@ function App() {
     }
   };
 
-  // not logged in → show login/signup
+  // show login/signup screen if not logged in
   if (!isLoggedIn) {
     return (
       <div className="App">
@@ -166,17 +167,17 @@ function App() {
             }
             setIsLoggedIn(true);
             setUserEmail(email);
-            setUserRole("member");  // new users default to member
+            setUserRole("member");
           }}
         />
       </div>
     );
   }
 
-  // main app UI
+  // main app UI when logged in
   return (
     <div className="App">
-      {/* logout */}
+      {/* logout button */}
       <div className="logout-container">
         <button
           className="view-button"
@@ -191,7 +192,7 @@ function App() {
         </button>
       </div>
 
-      {/* navigation */}
+      {/* navigation buttons */}
       <div className="view-buttons">
         <button className="view-button" onClick={() => setView("workout")}>
           Workout
@@ -203,16 +204,13 @@ function App() {
           Dashboard
         </button>
         {userRole === "admin" && (
-          <button
-            className="view-button"
-            onClick={() => setView("admin")}
-          >
+          <button className="view-button" onClick={() => setView("admin")}>
             Administration
           </button>
         )}
       </div>
 
-      {/* views */}
+      {/* exercise logging view */}
       {view === "workout" && (
         <>
           <h1>Exercise Log</h1>
@@ -271,6 +269,7 @@ function App() {
         </>
       )}
 
+      {/* trophy case view */}
       {view === "trophies" && (
         <>
           <h1>Trophy Case</h1>
@@ -278,6 +277,7 @@ function App() {
         </>
       )}
 
+      {/* dashboard view */}
       {view === "dashboard" && (
         <>
           <h1>Dashboard</h1>
@@ -285,6 +285,7 @@ function App() {
         </>
       )}
 
+      {/* admin user management view */}
       {view === "admin" && userRole === "admin" && (
         <>
           <h1>User Management</h1>
